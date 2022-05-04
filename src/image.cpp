@@ -10,8 +10,9 @@ Image::Image(const int w, const int h) : w_(w), h_(h) {
 }
 
 Color Image::Get(const int x, const int y) const {
-    if (0 < x && x < w_ && 0 < y && y < h_) {
-        const auto *px = &data_[y][x * 4];
+    const int ry = Height() - 1 - y;
+    if (0 < x && x < w_ && 0 < ry && ry < h_) {
+        const auto *px = &data_[ry][x * 4];
         return {px[0], px[1], px[2], px[3]};
     } else {
         return {};
@@ -19,8 +20,9 @@ Color Image::Get(const int x, const int y) const {
 }
 
 void Image::Set(const int x, const int y, const Color &color) {
-    if (0 < x && x < w_ && 0 < y && y < h_) {
-        auto *px = &data_[y][x * 4];
+    const int ry = Height() - 1 - y;
+    if (0 < x && x < w_ && 0 < ry && ry < h_) {
+        auto *px = &data_[ry][x * 4];
         px[0] = color.r;
         px[1] = color.g;
         px[2] = color.b;
@@ -28,12 +30,15 @@ void Image::Set(const int x, const int y, const Color &color) {
     }
 }
 
-bool Image::WritePngFile(const std::string &filename, const bool vertical_flip) {
-    std::unique_ptr<FILE, std::function<int(FILE *)>> file(fopen(filename.c_str(), "wb"), fclose);
+bool Image::WritePngFile(const std::string &filename,
+                         const bool vertical_flip) {
+    std::unique_ptr<FILE, std::function<int(FILE *)>> file(
+            fopen(filename.c_str(), "wb"), fclose);
     if (!file) {
         return false;
     }
-    auto *png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr, nullptr);
+    auto *png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr,
+                                        nullptr);
     if (!png) {
         return false;
     }
@@ -42,8 +47,9 @@ bool Image::WritePngFile(const std::string &filename, const bool vertical_flip) 
         return false;
     }
     png_init_io(png, file.get());
-    png_set_IHDR(png, info, Width(), Height(), 8, PNG_COLOR_TYPE_RGBA, PNG_INTERLACE_NONE,
-                 PNG_COMPRESSION_TYPE_DEFAULT, PNG_FILTER_TYPE_DEFAULT);
+    png_set_IHDR(png, info, Width(), Height(), 8, PNG_COLOR_TYPE_RGBA,
+                 PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
+                 PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png, info);
     png_write_image(png, data_);
     png_write_end(png, nullptr);

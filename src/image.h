@@ -19,7 +19,10 @@ struct Color {
 
     Color() = default;
 
-    Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b, const uint8_t a) : rgba{r, g, b, a} {}
+    Color(const std::uint8_t r, const std::uint8_t g, const std::uint8_t b,
+          const uint8_t a)
+        : rgba{r, g, b, a} {
+    }
 };
 
 class Image {
