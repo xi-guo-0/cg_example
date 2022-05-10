@@ -21,7 +21,7 @@ struct Vec {
     }
 
     T norm2() const {
-        return (*this) * (*this);
+        return Dot(*this, *this);
     }
 
     T norm() const {
@@ -32,10 +32,19 @@ struct Vec {
 };
 
 template<typename T, int n>
-T operator*(const Vec<T, n> &lhs, const Vec<T, n> &rhs) {
+T Dot(const Vec<T, n> &lhs, const Vec<T, n> &rhs) {
     T ans = 0;
     for (int i = 0; i < n; ++i) {
         ans += lhs[i] * rhs[i];
+    }
+    return ans;
+}
+
+template<typename T, int n>
+Vec<T, n> operator-(const Vec<T, n> &ary) {
+    auto ans = ary;
+    for (int i = 0; i < n; ++i) {
+        ans[i] = -ans[i];
     }
     return ans;
 }
@@ -110,15 +119,15 @@ struct Vec<double, 3> {
         assert(0 <= i && i < 3);
         return data_[i];
     }
+
     double norm2() const {
-        return (*this) * (*this);
+        return Dot(*this, *this);
     }
     double norm() const {
         return std::sqrt(norm2());
     }
-    Vec &normalized() {
-        *this = (*this) / norm();
-        return *this;
+    Vec Normalized() const {
+        return *this / norm();
     }
     union {
         struct {
@@ -132,5 +141,36 @@ struct Vec<double, 3> {
 
 using Vec3f = Vec<float, 3>;
 using Vec3d = Vec<double, 3>;
+
+struct Color {
+    double r;
+    double g;
+    double b;
+    double a;
+
+
+    Color(double r, double g, double b, double a)
+        : r(std::clamp(r, 0.0, 1.0)), g(std::clamp(g, 0.0, 1.0)),
+          b(std::clamp(b, 0.0, 1.0)), a(std::clamp(a, 0.0, 1.0)) {
+    }
+
+    Color() : Color(0, 0, 0, 0) {
+    }
+
+    explicit Color(const Vec3d &vec) : Color(vec.x_, vec.y_, vec.z_, 1.0) {
+    }
+    double operator[](int i) const {
+        if (0 == i) {
+            return r;
+        } else if (1 == i) {
+            return g;
+        } else if (2 == i) {
+            return b;
+        } else {
+            return a;
+        }
+    }
+};
+
 
 #endif//CG_EXAMPLE_SRC_VEC_H_

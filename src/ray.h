@@ -5,14 +5,10 @@
 
 class Ray {
 public:
+    const Vec3d origin_;
+    const Vec3d direction_;
     Ray(Vec3d origin, Vec3d direction);
-    const Vec3d &Origin() const;
-    const Vec3d &Direction() const;
-    Vec3d Evaluate(double t);
-
-private:
-    Vec3d origin_;
-    Vec3d direction_;
+    Vec3d At(double t) const;
 };
 
 

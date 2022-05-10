@@ -1,33 +1,20 @@
 #include "image.h"
+#include <algorithm>
 #include <memory>
 #include <png.h>
 
-Image::Image(const int w, const int h) : w_(w), h_(h) {
-    data_ = new std::uint8_t *[h];
-    for (int i = 0; i < h; ++i) {
-        data_[i] = new std::uint8_t[w * 4];
-    }
+Image::Image(int width, int height) {
+    assert(0 < width);
+    assert(0 < height);
+    data_ = std::vector<std::vector<Color>>(height, std::vector<Color>(width));
 }
 
-Color Image::Get(const int x, const int y) const {
-    const int ry = Height() - 1 - y;
-    if (0 < x && x < w_ && 0 < ry && ry < h_) {
-        const auto *px = &data_[ry][x * 4];
-        return {px[0], px[1], px[2], px[3]};
-    } else {
-        return {};
-    }
+const Color &Image::Get(int x, int y) const {
+    return data_[y][x];
 }
 
-void Image::Set(const int x, const int y, const Color &color) {
-    const int ry = Height() - 1 - y;
-    if (0 < x && x < w_ && 0 < ry && ry < h_) {
-        auto *px = &data_[ry][x * 4];
-        px[0] = color.r;
-        px[1] = color.g;
-        px[2] = color.b;
-        px[3] = color.a;
-    }
+void Image::Set(int x, int y, const Color &color) {
+    data_[y][x] = color;
 }
 
 bool Image::WritePngFile(const std::string &filename,
@@ -51,23 +38,34 @@ bool Image::WritePngFile(const std::string &filename,
                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png, info);
-    png_write_image(png, data_);
+    std::uint8_t **data = new std::uint8_t *[Height()];
+    for (int i = Height() - 1; 0 <= i; --i) {
+        int line = Height() - 1 - i;
+        data[line] = new std::uint8_t[4 * Width()];
+        for (int j = 0; j < Width(); ++j) {
+            std::uint8_t *pixel = &data[line][4 * j];
+            for (int k = 0; k < 4; ++k) {
+                pixel[k] = static_cast<std::uint8_t>(255 * data_[i][j][k]);
+            }
+        }
+    }
+    png_write_image(png, data);
+    for (int i = 0; i < Height(); ++i) {
+        delete[] data[i];
+    }
+    delete[] data;
     png_write_end(png, nullptr);
     png_destroy_write_struct(&png, &info);
     return true;
 }
 
 int Image::Width() const {
-    return w_;
+    return data_[0].size();
 }
 
 int Image::Height() const {
-    return h_;
+    return data_.size();
 }
 
 Image::~Image() {
-    for (int y = 0; y < Height(); ++y) {
-        delete[] data_[y];
-    }
-    delete[] data_;
 }

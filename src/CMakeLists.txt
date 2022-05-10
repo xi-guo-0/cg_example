@@ -1,2 +1,2 @@
-add_executable(main main.cpp image.cpp vec.cpp ray.cpp sphere.cpp)
+add_executable(main main.cpp image.cpp ray.cpp)
 target_link_libraries(main png)
