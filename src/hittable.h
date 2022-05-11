@@ -1,20 +1,24 @@
 #ifndef CG_EXAMPLE_SRC_HITTABLE_H_
 #define CG_EXAMPLE_SRC_HITTABLE_H_
+#include "color.h"
 #include "image.h"
 #include "ray.h"
-#include "vec.h"
+#include <Eigen/Dense>
 #include <memory>
 #include <variant>
 #include <vector>
 
 class HitRecord {
+private:
+    using T = Eigen::Vector3d;
+
 public:
-    Vec3d point_;
-    Vec3d normal_;
+    T point_;
+    T normal_;
     double t_;
     bool front_face_;
-    void SetFaceNormal(const Ray &ray, const Vec3d &outward_normal) {
-        front_face_ = Dot(ray.direction_, (outward_normal)) < 0;
+    void SetFaceNormal(const Ray &ray, const T &outward_normal) {
+        front_face_ = ray.direction_.dot(outward_normal) < 0;
         normal_ = front_face_ ? outward_normal : -outward_normal;
     }
 };
@@ -24,10 +28,13 @@ bool Hit(const Ray &ray, const Hittable &hittable, double t0, double t1,
          HitRecord *rec);
 
 class Sphere {
+private:
+    using T = Eigen::Vector3d;
+
 public:
-    const Vec3d center_;
+    const T center_;
     const double radius_;
-    Sphere(Vec3d center, double radius) : center_(center), radius_(radius) {
+    Sphere(T center, double radius) : center_(center), radius_(radius) {
     }
 };
 
@@ -35,9 +42,9 @@ template<>
 bool Hit(const Ray &ray, const Sphere &sphere, double t0, double t1,
          HitRecord *rec) {
     auto oc = ray.origin_ - sphere.center_;
-    auto a = Dot(ray.direction_, ray.direction_);
-    auto b = 2.0 * Dot(ray.direction_, oc);
-    auto c = Dot(oc, oc) - sphere.radius_ * sphere.radius_;
+    auto a = ray.direction_.dot(ray.direction_);
+    auto b = 2.0 * ray.direction_.dot(oc);
+    auto c = oc.dot(oc) - sphere.radius_ * sphere.radius_;
     double delta = b * b - 4 * a * c;
     if (delta < 0.0) {
         return false;
@@ -51,7 +58,7 @@ bool Hit(const Ray &ray, const Sphere &sphere, double t0, double t1,
     }
     rec->t_ = root;
     rec->point_ = ray.At(rec->t_);
-    auto outward_normal = (rec->point_ - sphere.center_).Normalized();
+    auto outward_normal = (rec->point_ - sphere.center_).normalized();
     rec->SetFaceNormal(ray, outward_normal);
     return true;
 }

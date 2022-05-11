@@ -6,6 +6,8 @@ FetchContent_Declare(
         libpng
         GIT_REPOSITORY https://github.com/glennrp/libpng.git
         GIT_TAG v1.6.37
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
 )
 set(PNG_SHARED ON CACHE BOOL "" FORCE)
 set(PNG_STATIC OFF CACHE BOOL "" FORCE)
@@ -18,4 +20,18 @@ include_directories(
         ${libpng_SOURCE_DIR}
         ${libpng_BINARY_DIR}
 )
+
+cmake_policy(SET CMP0077 NEW)
+FetchContent_Declare(
+        Eigen
+        GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+        GIT_TAG 3.4.0
+        GIT_SHALLOW TRUE
+        GIT_PROGRESS TRUE
+)
+set(EIGEN_BUILD_DOC OFF)
+set(BUILD_TESTING OFF)
+set(EIGEN_BUILD_PKGCONFIG OFF)
+FetchContent_MakeAvailable(Eigen)
+
 add_subdirectory(src)

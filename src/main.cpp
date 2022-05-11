@@ -1,18 +1,20 @@
+#include "color.h"
 #include "hittable.h"
 #include "image.h"
 #include "ray.h"
-#include "vec.h"
+#include <Eigen/Dense>
 #include <limits>
 
 template<typename Hittable>
 Color RayColor(const Ray &ray, const Hittable &world) {
     HitRecord rec;
     if (Hit(ray, world, 0, std::numeric_limits<double>::max(), &rec)) {
-        return Color(0.5 * (rec.normal_ + Vec3d(1.0, 1.0, 1.0)));
+        return Color(0.5 * (rec.normal_ + Eigen::Vector3d(1.0, 1.0, 1.0)));
     }
-    Vec3d direction = ray.direction_.Normalized();
-    auto t = 0.5 * (direction.y_ + 1.0);
-    return Color((1.0 - t) * Vec3d(1.0, 1.0, 1.0) + t * Vec3d(0.5, 0.7, 1.0));
+    Eigen::Vector3d direction = ray.direction_.normalized();
+    auto t = 0.5 * (direction(1) + 1.0);
+    return Color((1.0 - t) * Eigen::Vector3d(1.0, 1.0, 1.0) +
+                 t * Eigen::Vector3d(0.5, 0.7, 1.0));
 }
 
 int main() {
@@ -27,11 +29,11 @@ int main() {
     const auto viewport_width = aspect_ratio * viewport_height;
     auto focal_length = 1.0;
 
-    auto origin = Vec3d(0.0, 0.0, 0.0);
-    auto horizontal = Vec3d(viewport_width, 0.0, 0.0);
-    auto vertical = Vec3d(0, viewport_height, 0);
+    auto origin = Eigen::Vector3d(0.0, 0.0, 0.0);
+    auto horizontal = Eigen::Vector3d(viewport_width, 0.0, 0.0);
+    auto vertical = Eigen::Vector3d(0, viewport_height, 0);
     auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 -
-                             Vec3d(0.0, 0.0, focal_length);
+                             Eigen::Vector3d(0.0, 0.0, focal_length);
 
 
     Sphere sphere0({0.0, 0.0, -1.0}, 0.5);

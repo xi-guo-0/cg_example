@@ -1,7 +1,7 @@
 #ifndef CG_EXAMPLE_SRC_IMAGE_H_
 #define CG_EXAMPLE_SRC_IMAGE_H_
 
-#include "vec.h"
+#include "color.h"
 #include <cstdint>
 #include <png.h>
 #include <string>

@@ -1,8 +1,10 @@
 #include "ray.h"
-Ray::Ray(Vec3d origin, Vec3d direction)
-    : origin_(origin), direction_(direction.Normalized()) {
+
+#include <utility>
+Ray::Ray(T origin, const T &direction)
+    : origin_(std::move(origin)), direction_(direction.normalized()) {
 }
 
-Vec3d Ray::At(double t) const {
+auto Ray::At(double t) const -> T {
     return origin_ + (direction_ * t);
 }
