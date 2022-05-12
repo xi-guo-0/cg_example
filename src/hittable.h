@@ -107,6 +107,16 @@ bool Hit(const Ray &ray, const Triangle &triangle, double t0, double t1,
     return true;
 }
 
+using Surface = std::variant<Sphere, Triangle>;
+
+template<>
+bool Hit(const Ray &ray, const Surface &surface, double t0, double t1,
+         HitRecord *rec) {
+    bool ans;
+    std::visit([&](auto &&arg) { ans = Hit(ray, arg, t0, t1, rec); }, surface);
+    return ans;
+}
+
 template<typename Hittable>
 bool Hit(const Ray &ray, const std::vector<Hittable> &hitables, double t0,
          double t1, HitRecord *rec) {
