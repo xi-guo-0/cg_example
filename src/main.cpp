@@ -38,13 +38,14 @@ int main() {
 
     Sphere sphere0({0.0, 0.0, -1.0}, 0.5);
     Sphere sphere1({0.0, -50.5, -1.0}, 50.0);
+    Triangle triangle{{-0.5, 0, -0.5}, {0, 0.5, -2}, {0.5, 0, -0.5}};
     std::vector<Sphere> spheres{sphere0, sphere1};
     for (int y = 0; y < img.Height(); ++y) {
         for (int x = 0; x < img.Width(); ++x) {
             auto u = static_cast<double>(x) / (image_width - 1);
             auto v = static_cast<double>(y) / (image_height - 1);
             Ray ray(origin, lower_left_corner + u * horizontal + v * vertical);
-            img.Set(x, y, RayColor(ray, spheres));
+            img.Set(x, y, RayColor(ray, triangle));
         }
     }
     img.WritePngFile("a.png");

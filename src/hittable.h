@@ -5,6 +5,7 @@
 #include "ray.h"
 #include <Eigen/Dense>
 #include <memory>
+#include <utility>
 #include <variant>
 #include <vector>
 
@@ -34,7 +35,8 @@ private:
 public:
     const T center_;
     const double radius_;
-    Sphere(T center, double radius) : center_(center), radius_(radius) {
+    Sphere(T center, double radius)
+        : center_(std::move(center)), radius_(radius) {
     }
 };
 
@@ -59,6 +61,48 @@ bool Hit(const Ray &ray, const Sphere &sphere, double t0, double t1,
     rec->t_ = root;
     rec->point_ = ray.At(rec->t_);
     auto outward_normal = (rec->point_ - sphere.center_).normalized();
+    rec->SetFaceNormal(ray, outward_normal);
+    return true;
+}
+
+class Triangle {
+private:
+    using T = Eigen::Vector3d;
+
+public:
+    const T a_;
+    const T b_;
+    const T c_;
+    Triangle(T a, T b, T c)
+        : a_(std::move(a)), b_(std::move(b)), c_(std::move(c)) {
+    }
+};
+template<>
+bool Hit(const Ray &ray, const Triangle &triangle, double t0, double t1,
+         HitRecord *rec) {
+    Eigen::Matrix3d A;
+    A.col(0) = triangle.a_ - triangle.b_;
+    A.col(1) = triangle.a_ - triangle.c_;
+    A.col(2) = ray.direction_;
+    Eigen::Vector3d B = triangle.a_ - ray.origin_;
+    Eigen::Vector3d X = A.colPivHouseholderQr().solve(B);
+    auto beta = X(0);
+    auto gamma = X(1);
+    auto t = X(2);
+    if (!(t0 <= t && t < t1)) {
+        return false;
+    }
+    if (!(0 <= gamma && gamma <= 1)) {
+        return false;
+    }
+    if (!(0 <= beta && beta <= 1 - gamma)) {
+        return false;
+    }
+    rec->t_ = t;
+    rec->point_ = ray.At(rec->t_);
+    auto outward_normal =
+            ((triangle.c_ - triangle.a_).cross(triangle.b_ - triangle.a_))
+                    .normalized();
     rec->SetFaceNormal(ray, outward_normal);
     return true;
 }
