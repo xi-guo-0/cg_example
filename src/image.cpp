@@ -38,9 +38,9 @@ bool Image::WritePngFile(const std::string &filename,
                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png, info);
-    std::uint8_t **data = new std::uint8_t *[Height()];
+    auto **data = new std::uint8_t *[Height()];
     for (int i = Height() - 1; 0 <= i; --i) {
-        int line = Height() - 1 - i;
+        int line = vertical_flip ? (Height() - 1 - i) : i;
         data[line] = new std::uint8_t[4 * Width()];
         for (int j = 0; j < Width(); ++j) {
             std::uint8_t *pixel = &data[line][4 * j];
@@ -67,5 +67,4 @@ int Image::Height() const {
     return data_.size();
 }
 
-Image::~Image() {
-}
+Image::~Image() = default;
