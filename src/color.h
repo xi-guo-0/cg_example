@@ -8,15 +8,13 @@
 
 class Color {
 public:
-    double r;
-    double g;
-    double b;
-    double a;
+    double r_;
+    double g_;
+    double b_;
+    double a_;
 
 
-    Color(double r, double g, double b, double a)
-        : r(std::clamp(r, 0.0, 1.0)), g(std::clamp(g, 0.0, 1.0)),
-          b(std::clamp(b, 0.0, 1.0)), a(std::clamp(a, 0.0, 1.0)) {
+    Color(double r, double g, double b, double a) : r_(r), g_(g), b_(b), a_(a) {
     }
 
     Color() : Color(0, 0, 0, 0) {
@@ -27,13 +25,13 @@ public:
     }
     double operator[](int i) const {
         if (0 == i) {
-            return r;
+            return r_;
         } else if (1 == i) {
-            return g;
+            return g_;
         } else if (2 == i) {
-            return b;
+            return b_;
         } else {
-            return a;
+            return a_;
         }
     }
 };

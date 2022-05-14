@@ -45,7 +45,8 @@ bool Image::WritePngFile(const std::string &filename,
         for (int j = 0; j < Width(); ++j) {
             std::uint8_t *pixel = &data[line][4 * j];
             for (int k = 0; k < 4; ++k) {
-                pixel[k] = static_cast<std::uint8_t>(255 * data_[i][j][k]);
+                pixel[k] = static_cast<std::uint8_t>(
+                        255 * std::clamp(data_[i][j][k], 0.0, 1.0));
             }
         }
     }

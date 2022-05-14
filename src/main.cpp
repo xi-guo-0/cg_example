@@ -1,3 +1,4 @@
+#include "camera.h"
 #include "color.h"
 #include "hittable.h"
 #include "image.h"
@@ -27,13 +28,8 @@ int main() {
     // Camera
     const auto viewport_height = 2.0;
     const auto viewport_width = aspect_ratio * viewport_height;
-    auto focal_length = 1.0;
-
-    auto origin = Eigen::Vector3d(0.0, 0.0, 0.0);
-    auto horizontal = Eigen::Vector3d(viewport_width, 0.0, 0.0);
-    auto vertical = Eigen::Vector3d(0, viewport_height, 0);
-    auto lower_left_corner = origin - horizontal / 2.0 - vertical / 2.0 -
-                             Eigen::Vector3d(0.0, 0.0, focal_length);
+    Camera camera({0, 0, 0}, {viewport_width, 0, 0}, {0, viewport_height, 0},
+                  1.0);
 
 
     Sphere sphere0({0.0, 0.0, -1.0}, 0.5);
@@ -44,7 +40,7 @@ int main() {
         for (int x = 0; x < img.Width(); ++x) {
             auto u = static_cast<double>(x) / (image_width - 1);
             auto v = static_cast<double>(y) / (image_height - 1);
-            Ray ray(origin, lower_left_corner + u * horizontal + v * vertical);
+            Ray ray = camera.GetRay(u, v);
             img.Set(x, y, RayColor(ray, surfaces));
         }
     }
