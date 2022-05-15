@@ -1,4 +1,4 @@
-#include "ray.h"
+#include <ray.h>
 
 #include <utility>
 Ray::Ray(T origin, const T &direction)

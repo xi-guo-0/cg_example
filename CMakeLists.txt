@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.20)
 set(CMAKE_CXX_STANDARD 20)
-project(cg_example)
+project(CgExample)
 include(FetchContent)
 FetchContent_Declare(
         libpng
@@ -35,3 +35,4 @@ set(EIGEN_BUILD_PKGCONFIG OFF)
 FetchContent_MakeAvailable(Eigen)
 
 add_subdirectory(src)
+add_subdirectory(apps)

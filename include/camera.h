@@ -1,8 +1,8 @@
 #ifndef CG_EXAMPLE_SRC_CAMERA_H_
 #define CG_EXAMPLE_SRC_CAMERA_H_
 
-#include "ray.h"
 #include <Eigen/Dense>
+#include <ray.h>
 
 class Camera {
 public:

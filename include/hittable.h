@@ -1,10 +1,10 @@
 #ifndef CG_EXAMPLE_SRC_HITTABLE_H_
 #define CG_EXAMPLE_SRC_HITTABLE_H_
-#include "color.h"
-#include "image.h"
-#include "ray.h"
 #include <Eigen/Dense>
+#include <color.h>
+#include <image.h>
 #include <memory>
+#include <ray.h>
 #include <utility>
 #include <variant>
 #include <vector>

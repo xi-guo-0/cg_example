@@ -1,2 +1,3 @@
-add_executable(main main.cpp image.cpp ray.cpp camera.cpp)
-target_link_libraries(main png Eigen3::Eigen)
+add_library(ray_tracing image.cpp ray.cpp camera.cpp)
+target_include_directories(ray_tracing PUBLIC ${CgExample_SOURCE_DIR}/include)
+target_link_libraries(ray_tracing png Eigen3::Eigen)

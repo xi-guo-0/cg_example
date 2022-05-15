@@ -1,5 +1,5 @@
-#include "image.h"
 #include <algorithm>
+#include <image.h>
 #include <memory>
 #include <png.h>
 

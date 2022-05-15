@@ -1,10 +1,10 @@
-#include "camera.h"
-#include "color.h"
-#include "hittable.h"
-#include "image.h"
-#include "ray.h"
 #include <Eigen/Dense>
+#include <camera.h>
+#include <color.h>
+#include <hittable.h>
+#include <image.h>
 #include <limits>
+#include <ray.h>
 
 template<typename Hittable>
 Color RayColor(const Ray &ray, const Hittable &world) {
