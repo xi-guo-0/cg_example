@@ -3,6 +3,7 @@
 #include <Eigen/Dense>
 #include <color.h>
 #include <image.h>
+#include <material.h>
 #include <memory>
 #include <ray.h>
 #include <utility>
@@ -10,126 +11,84 @@
 #include <vector>
 
 class HitRecord {
-private:
-    using T = Eigen::Vector3d;
-
 public:
-    T point_;
-    T normal_;
+    HitRecord() : material_(std::make_shared<Material>(Color(0, 0, 0))) {
+    }
+    HitRecord(const HitRecord &other) = default;
+    HitRecord &operator=(const HitRecord &other) {
+        point_ = other.point_;
+        normal_ = other.normal_;
+        t_ = other.t_;
+        front_face_ = other.front_face_;
+        material_ = other.material_;
+        return *this;
+    };
+    Eigen::Vector3d point_;
+    Eigen::Vector3d normal_;
     double t_;
     bool front_face_;
-    void SetFaceNormal(const Ray &ray, const T &outward_normal) {
+    std::shared_ptr<Material> material_;
+    void SetFaceNormal(const Ray &ray, const Eigen::Vector3d &outward_normal) {
         front_face_ = ray.direction_.dot(outward_normal) < 0;
         normal_ = front_face_ ? outward_normal : -outward_normal;
     }
 };
 
-template<typename Hittable>
-bool Hit(const Ray &ray, const Hittable &hittable, double t0, double t1,
-         HitRecord *rec);
 
-class Sphere {
-private:
-    using T = Eigen::Vector3d;
-
+class Hittable {
 public:
-    const T center_;
+    virtual bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) = 0;
+};
+
+class HitElement : public Hittable {
+public:
+    explicit HitElement(std::shared_ptr<Material> material);
+    std::shared_ptr<Material> GetMaterial() const;
+
+protected:
+    const std::shared_ptr<Material> material_;
+};
+
+class Sphere : public HitElement {
+public:
+    Sphere(Eigen::Vector3d center, double radius,
+           std::shared_ptr<Material> material);
+
+    const Eigen::Vector3d &GetCenter() const;
+
+    double GetRadius() const;
+
+
+    bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) override;
+
+private:
+    const Eigen::Vector3d center_;
     const double radius_;
-    Sphere(T center, double radius)
-        : center_(std::move(center)), radius_(radius) {
-    }
 };
 
-template<>
-bool Hit(const Ray &ray, const Sphere &sphere, double t0, double t1,
-         HitRecord *rec) {
-    auto oc = ray.origin_ - sphere.center_;
-    auto a = ray.direction_.dot(ray.direction_);
-    auto b = 2.0 * ray.direction_.dot(oc);
-    auto c = oc.dot(oc) - sphere.radius_ * sphere.radius_;
-    double delta = b * b - 4 * a * c;
-    if (delta < 0.0) {
-        return false;
-    }
-    auto root = (-b - sqrt(delta)) / a / 2.0;
-    if (root < t0 || t1 <= root) {
-        root = (-b + sqrt(delta)) / a / 2.0;
-        if (root < t0 || t1 <= root) {
-            return false;
-        }
-    }
-    rec->t_ = root;
-    rec->point_ = ray.At(rec->t_);
-    auto outward_normal = (rec->point_ - sphere.center_).normalized();
-    rec->SetFaceNormal(ray, outward_normal);
-    return true;
-}
 
-class Triangle {
-private:
-    using T = Eigen::Vector3d;
-
+class Triangle : public HitElement {
 public:
-    const T a_;
-    const T b_;
-    const T c_;
-    Triangle(T a, T b, T c)
-        : a_(std::move(a)), b_(std::move(b)), c_(std::move(c)) {
-    }
+    Triangle(Eigen::Vector3d a, Eigen::Vector3d b, Eigen::Vector3d c,
+             std::shared_ptr<Material> material);
+    const Eigen::Vector3d &GetA() const;
+    const Eigen::Vector3d &GetB() const;
+    const Eigen::Vector3d &GetC() const;
+    bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) override;
+
+private:
+    const Eigen::Vector3d a_;
+    const Eigen::Vector3d b_;
+    const Eigen::Vector3d c_;
 };
-template<>
-bool Hit(const Ray &ray, const Triangle &triangle, double t0, double t1,
-         HitRecord *rec) {
-    Eigen::Matrix3d A;
-    A.col(0) = triangle.a_ - triangle.b_;
-    A.col(1) = triangle.a_ - triangle.c_;
-    A.col(2) = ray.direction_;
-    Eigen::Vector3d B = triangle.a_ - ray.origin_;
-    Eigen::Vector3d X = A.colPivHouseholderQr().solve(B);
-    auto beta = X(0);
-    auto gamma = X(1);
-    auto t = X(2);
-    if (!(t0 <= t && t < t1)) {
-        return false;
-    }
-    if (!(0 <= gamma && gamma <= 1)) {
-        return false;
-    }
-    if (!(0 <= beta && beta <= 1 - gamma)) {
-        return false;
-    }
-    rec->t_ = t;
-    rec->point_ = ray.At(rec->t_);
-    auto outward_normal =
-            ((triangle.c_ - triangle.a_).cross(triangle.b_ - triangle.a_))
-                    .normalized();
-    rec->SetFaceNormal(ray, outward_normal);
-    return true;
-}
 
-using Surface = std::variant<Sphere, Triangle>;
+class HitList : public Hittable {
+public:
+    void add(std::shared_ptr<Hittable> &hittable);
+    bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) override;
 
-template<>
-bool Hit(const Ray &ray, const Surface &surface, double t0, double t1,
-         HitRecord *rec) {
-    bool ans;
-    std::visit([&](auto &&arg) { ans = Hit(ray, arg, t0, t1, rec); }, surface);
-    return ans;
-}
+private:
+    std::vector<std::shared_ptr<Hittable>> hit_list_;
+};
 
-template<typename Hittable>
-bool Hit(const Ray &ray, const std::vector<Hittable> &hitables, double t0,
-         double t1, HitRecord *rec) {
-    HitRecord temp_rec;
-    auto hit_anything = false;
-    auto closest_so_far = t1;
-    for (const auto &hittable: hitables) {
-        if (Hit(ray, hittable, t0, closest_so_far, &temp_rec)) {
-            hit_anything = true;
-            closest_so_far = temp_rec.t_;
-        }
-    }
-    *rec = temp_rec;
-    return hit_anything;
-}
 #endif//CG_EXAMPLE_SRC_HITTABLE_H_
