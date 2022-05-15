@@ -12,7 +12,8 @@
 
 class HitRecord {
 public:
-    HitRecord() : material_(std::make_shared<Material>(Color(0, 0, 0))) {
+    HitRecord()
+        : material_(std::make_shared<Material>(Color(0, 0, 0), 1.0, 1.0, 1.0)) {
     }
     HitRecord(const HitRecord &other) = default;
     HitRecord &operator=(const HitRecord &other) {
@@ -29,15 +30,17 @@ public:
     bool front_face_;
     std::shared_ptr<Material> material_;
     void SetFaceNormal(const Ray &ray, const Eigen::Vector3d &outward_normal) {
-        front_face_ = ray.direction_.dot(outward_normal) < 0;
-        normal_ = front_face_ ? outward_normal : -outward_normal;
+        Eigen::Vector3d outward = outward_normal.normalized();
+        front_face_ = ray.direction_.dot(outward) < 0;
+        normal_ = front_face_ ? outward : -outward;
     }
 };
 
 
 class Hittable {
 public:
-    virtual bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) = 0;
+    virtual bool Hit(const Ray &ray, double t0, double t1,
+                     HitRecord *hrec) const = 0;
 };
 
 class HitElement : public Hittable {
@@ -59,7 +62,8 @@ public:
     double GetRadius() const;
 
 
-    bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) override;
+    bool Hit(const Ray &ray, double t0, double t1,
+             HitRecord *hrec) const override;
 
 private:
     const Eigen::Vector3d center_;
@@ -74,7 +78,8 @@ public:
     const Eigen::Vector3d &GetA() const;
     const Eigen::Vector3d &GetB() const;
     const Eigen::Vector3d &GetC() const;
-    bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) override;
+    bool Hit(const Ray &ray, double t0, double t1,
+             HitRecord *hrec) const override;
 
 private:
     const Eigen::Vector3d a_;
@@ -85,7 +90,8 @@ private:
 class HitList : public Hittable {
 public:
     void add(std::shared_ptr<Hittable> &hittable);
-    bool Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) override;
+    bool Hit(const Ray &ray, double t0, double t1,
+             HitRecord *hrec) const override;
 
 private:
     std::vector<std::shared_ptr<Hittable>> hit_list_;

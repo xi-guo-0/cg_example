@@ -25,7 +25,7 @@ double Sphere::GetRadius() const {
 }
 
 
-bool Sphere::Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) {
+bool Sphere::Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) const {
     auto oc = ray.origin_ - GetCenter();
     auto a = ray.direction_.dot(ray.direction_);
     auto b = 2.0 * ray.direction_.dot(oc);
@@ -67,7 +67,8 @@ const Eigen::Vector3d &Triangle::GetC() const {
     return c_;
 }
 
-bool Triangle::Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) {
+bool Triangle::Hit(const Ray &ray, double t0, double t1,
+                   HitRecord *hrec) const {
     Eigen::Matrix3d A;
     A.col(0) = GetA() - GetB();
     A.col(1) = GetA() - GetC();
@@ -97,7 +98,7 @@ bool Triangle::Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) {
 void HitList::add(std::shared_ptr<Hittable> &hittable) {
     hit_list_.push_back(hittable);
 }
-bool HitList::Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) {
+bool HitList::Hit(const Ray &ray, double t0, double t1, HitRecord *hrec) const {
     HitRecord temp_rec;
     auto hit_anything = false;
     auto closest_so_far = t1;
