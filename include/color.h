@@ -3,6 +3,6 @@
 
 #include <Eigen/Dense>
 
-using Color = Eigen::Array3d;
+using Color = Eigen::Array4d;
 
 #endif//CG_EXAMPLE_SRC_COLOR_H_

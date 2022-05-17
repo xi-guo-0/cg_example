@@ -34,17 +34,17 @@ bool Image::WritePngFile(const std::string &filename,
         return false;
     }
     png_init_io(png, file.get());
-    png_set_IHDR(png, info, Width(), Height(), 8, PNG_COLOR_TYPE_RGB,
+    png_set_IHDR(png, info, Width(), Height(), 8, PNG_COLOR_TYPE_RGBA,
                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
                  PNG_FILTER_TYPE_DEFAULT);
     png_write_info(png, info);
     auto **data = new std::uint8_t *[Height()];
     for (int i = Height() - 1; 0 <= i; --i) {
         int line = vertical_flip ? (Height() - 1 - i) : i;
-        data[line] = new std::uint8_t[3 * Width()];
+        data[line] = new std::uint8_t[4 * Width()];
         for (int j = 0; j < Width(); ++j) {
-            std::uint8_t *pixel = &data[line][3 * j];
-            for (int k = 0; k < 3; ++k) {
+            std::uint8_t *pixel = &data[line][4 * j];
+            for (int k = 0; k < 4; ++k) {
                 pixel[k] = static_cast<std::uint8_t>(
                         255 * std::clamp(data_[i][j][k], 0.0, 1.0));
             }

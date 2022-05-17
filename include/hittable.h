@@ -13,7 +13,8 @@
 class HitRecord {
 public:
     HitRecord()
-        : material_(std::make_shared<Material>(Color(0, 0, 0), 1.0, 1.0, 1.0)) {
+        : material_(std::make_shared<Material>(Color(0, 0, 0, 1), 1.0, 1.0,
+                                               1.0)) {
     }
     HitRecord(const HitRecord &other) = default;
     HitRecord &operator=(const HitRecord &other) {

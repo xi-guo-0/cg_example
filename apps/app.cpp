@@ -31,7 +31,7 @@ Color RayColor(const Ray &ray, const std::shared_ptr<Light> light,
                     light, world, times - 1);
         }
     } else {
-        c = {0, 0, 0};
+        c = {0, 0, 0, 1};
     }
     return c;
 }
@@ -44,7 +44,7 @@ int main() {
     Image img(image_width, image_height);
 
     std::shared_ptr<Light> light = std::make_shared<PointLight>(
-            Color(1, 1, 1), Eigen::Vector3d(1, 1, 0));
+            Color(1, 1, 1, 1), Eigen::Vector3d(1, 1, 0));
 
     // Camera
     const auto viewport_height = 2.0;
@@ -55,17 +55,17 @@ int main() {
 
     std::shared_ptr<Hittable> sphere0 = std::make_shared<Sphere>(
             Eigen::Vector3d{-0.6, 0.0, -1.0}, 0.5,
-            std::make_shared<Material>(Color(0.2, 0.1, 0.1), 55, 0.99, 5));
+            std::make_shared<Material>(Color(0.2, 0.1, 0.1, 1), 55, 0.99, 5));
     std::shared_ptr<Hittable> sphere1 = std::make_shared<Sphere>(
             Eigen::Vector3d{0.6, 0.0, -1.0}, 0.5,
-            std::make_shared<Material>(Color{0.1, 0.2, 0.1}, 25, 0.99, 5));
+            std::make_shared<Material>(Color{0.1, 0.2, 0.1, 1}, 25, 0.99, 5));
     std::shared_ptr<Hittable> sphere2 = std::make_shared<Sphere>(
             Eigen::Vector3d{0.0, -50.5, -1.0}, 50.0,
-            std::make_shared<Material>(Color{0.1, 0.1, 0.2}, 25, 0.99, 10));
+            std::make_shared<Material>(Color{0.1, 0.1, 0.2, 1}, 25, 0.99, 10));
     std::shared_ptr<Hittable> triangle = std::make_shared<Triangle>(
             Eigen::Vector3d{-0.5, 0, -0.5}, Eigen::Vector3d{0, 0.5, -2},
             Eigen::Vector3d{0.5, 0, -0.5},
-            std::make_shared<Material>(Color(0, 0, 1), 38, 0.99, 10000));
+            std::make_shared<Material>(Color(0, 0, 1, 1), 38, 0.99, 10000));
     HitList hit_list;
     hit_list.add(sphere0);
     hit_list.add(sphere1);
