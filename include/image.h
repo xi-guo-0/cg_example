@@ -22,6 +22,8 @@ public:
 
     int Height() const;
 
+    void Line(int x0, int y0, int x1, int y1, const Color &color);
+
     ~Image();
 
 private:
