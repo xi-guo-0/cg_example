@@ -21,18 +21,12 @@ bool Image::WritePngFile(const std::string &filename,
                          const bool vertical_flip) {
     std::unique_ptr<FILE, std::function<int(FILE *)>> file(
             fopen(filename.c_str(), "wb"), fclose);
-    if (!file) {
-        return false;
-    }
+    if (!file) { return false; }
     auto *png = png_create_write_struct(PNG_LIBPNG_VER_STRING, nullptr, nullptr,
                                         nullptr);
-    if (!png) {
-        return false;
-    }
+    if (!png) { return false; }
     auto *info = png_create_info_struct(png);
-    if (!info) {
-        return false;
-    }
+    if (!info) { return false; }
     png_init_io(png, file.get());
     png_set_IHDR(png, info, Width(), Height(), 8, PNG_COLOR_TYPE_RGBA,
                  PNG_INTERLACE_NONE, PNG_COMPRESSION_TYPE_DEFAULT,
@@ -93,6 +87,42 @@ void Image::Line(int x0, int y0, int x1, int y1, const Color &color) {
         if (dx < error2) {
             y += (y0 < y1 ? 1 : -1);
             error2 -= dx * 2;
+        }
+    }
+}
+
+void Image::Line(const Eigen::Vector2i &a, const Eigen::Vector2i &b,
+                 const Color &color) {
+    Line(a.x(), a.y(), b.x(), b.y(), color);
+}
+
+void Image::Triangle(Eigen::Vector2i a, Eigen::Vector2i b, Eigen::Vector2i c,
+                     const Color &color) {
+    if (a.y() == b.y() && a.y() == c.y()) { return; }
+    if (b.y() < a.y()) { std::swap(a, b); }
+    if (c.y() < a.y()) { std::swap(a, c); }
+    if (c.y() < b.y()) { std::swap(b, c); }
+    int total_height = c.y() - a.y();
+    for (int i = 0; i < total_height; ++i) {
+        bool is_second_half = (b.y() - a.y() < i) || a.y() == b.y();
+        int segment_height = is_second_half ? c.y() - b.y() : b.y() - a.y();
+        double alpha = static_cast<double>(i) / total_height;
+        double beta =
+                static_cast<double>(i - (is_second_half ? b.y() - a.y() : 0)) /
+                segment_height;
+        Eigen::Vector2i left{static_cast<int>(a.x() + (c.x() - a.x()) * alpha),
+                             static_cast<int>(a.y() + (c.y() - a.y()) * alpha)};
+
+        Eigen::Vector2i right{static_cast<int>(a.x() + (b.x() - a.x()) * beta),
+                              static_cast<int>(a.y() + (b.y() - a.y()) * beta)};
+        if (is_second_half) {
+            right = Eigen::Vector2i{
+                    static_cast<int>(b.x() + (c.x() - b.x()) * beta),
+                    static_cast<int>(b.y() + (c.y() - b.y()) * beta)};
+        }
+        if (right.x() < left.x()) { std::swap(left, right); }
+        for (int j = left.x(); j <= right.x(); ++j) {
+            Set(j, a.y() + i, color);
         }
     }
 }

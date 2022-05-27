@@ -24,6 +24,12 @@ public:
 
     void Line(int x0, int y0, int x1, int y1, const Color &color);
 
+    void Line(const Eigen::Vector2i &a, const Eigen::Vector2i &b,
+              const Color &color);
+
+    void Triangle(Eigen::Vector2i a, Eigen::Vector2i b, Eigen::Vector2i c,
+                  const Color &color);
+
     ~Image();
 
 private:
