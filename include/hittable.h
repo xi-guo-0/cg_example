@@ -76,9 +76,9 @@ class Triangle : public HitElement {
 public:
     Triangle(Eigen::Vector3d a, Eigen::Vector3d b, Eigen::Vector3d c,
              std::shared_ptr<Material> material);
-    const Eigen::Vector3d &GetA() const;
-    const Eigen::Vector3d &GetB() const;
-    const Eigen::Vector3d &GetC() const;
+    const Eigen::Vector3d &a() const;
+    const Eigen::Vector3d &b() const;
+    const Eigen::Vector3d &c() const;
     bool Hit(const Ray &ray, double t0, double t1,
              HitRecord *hrec) const override;
 

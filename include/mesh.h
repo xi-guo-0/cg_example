@@ -2,12 +2,34 @@
 #define CGEXAMPLE_INCLUDE_MESH_H_
 
 #include <Eigen/Dense>
+#include <hittable.h>
 #include <string>
 #include <vector>
 
+class BspTree {
+public:
+    BspTree();
+
+    explicit BspTree(Triangle triangle);
+
+    void Add(const Triangle &triangle);
+
+    class Node {
+    public:
+        Node *left_;
+        Node *right_;
+        Triangle triangle_;
+        explicit Node(Triangle triangle);
+        Node(Triangle triangle, Node *left, Node *right);
+        double f(const Eigen::Vector3d &p) const;
+        void Add(const Triangle &triangle);
+    };
+    Node *root;
+};
+
 class Mesh {
 public:
-    Mesh(const std::string &filename);
+    explicit Mesh(const std::string &filename);
 
     int nverts() const;
 

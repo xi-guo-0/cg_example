@@ -55,25 +55,25 @@ Triangle::Triangle(Eigen::Vector3d a, Eigen::Vector3d b, Eigen::Vector3d c,
       HitElement(std::move(material)) {
 }
 
-const Eigen::Vector3d &Triangle::GetA() const {
+const Eigen::Vector3d &Triangle::a() const {
     return a_;
 }
 
-const Eigen::Vector3d &Triangle::GetB() const {
+const Eigen::Vector3d &Triangle::b() const {
     return b_;
 }
 
-const Eigen::Vector3d &Triangle::GetC() const {
+const Eigen::Vector3d &Triangle::c() const {
     return c_;
 }
 
 bool Triangle::Hit(const Ray &ray, double t0, double t1,
                    HitRecord *hrec) const {
     Eigen::Matrix3d A;
-    A.col(0) = GetA() - GetB();
-    A.col(1) = GetA() - GetC();
+    A.col(0) = a() - b();
+    A.col(1) = a() - c();
     A.col(2) = ray.direction_;
-    Eigen::Vector3d B = GetA() - ray.origin_;
+    Eigen::Vector3d B = a() - ray.origin_;
     Eigen::Vector3d X = A.colPivHouseholderQr().solve(B);
     auto beta = X(0);
     auto gamma = X(1);
@@ -90,7 +90,7 @@ bool Triangle::Hit(const Ray &ray, double t0, double t1,
     hrec->t_ = t;
     hrec->point_ = ray.At(hrec->t_);
     auto outward_normal =
-            ((GetC() - GetA()).cross(GetB() - GetA())).normalized();
+            ((c() - a()).cross(b() - a())).normalized();
     hrec->SetFaceNormal(ray, outward_normal);
     hrec->material_ = material_;
     return true;
