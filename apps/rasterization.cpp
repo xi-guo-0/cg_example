@@ -1,6 +1,7 @@
 #include <array>
 #include <image.h>
 #include <mesh.h>
+#include <numbers>
 #include <random>
 
 int main() {
@@ -14,11 +15,15 @@ int main() {
 
     Eigen::Vector3d light_dir{0, 0, -1};
 
+
+    auto rotate_x = Eigen::AngleAxis<double>(std::numbers::pi * 18 / 12.0,
+                                             Eigen::Vector3d{1, 0, 0});
+
     for (int i = 0; i < mesh.nfaces(); ++i) {
         std::array<Eigen::Vector2i, 3> coors;
         std::array<Eigen::Vector3d, 3> world_coors;
         for (int j = 0; j < 3; ++j) {
-            Eigen::Vector3d v = mesh.vert(i, j);
+            Eigen::Vector3d v = rotate_x * mesh.vert(i, j);
             coors[j] = Eigen::Vector2i{(v.x() + 1.0) * image_width / 2,
                                        (v.y() + 1.0) * image_height / 2};
             world_coors[j] = v;
