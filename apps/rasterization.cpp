@@ -12,19 +12,26 @@ int main() {
 
     Mesh mesh("figure.obj");
 
-    std::mt19937 gen(std::random_device{}());
-    std::uniform_real_distribution<> dis(0.0, 1.0);
+    Eigen::Vector3d light_dir{0, 0, -1};
 
     for (int i = 0; i < mesh.nfaces(); ++i) {
         std::array<Eigen::Vector2i, 3> coors;
+        std::array<Eigen::Vector3d, 3> world_coors;
         for (int j = 0; j < 3; ++j) {
             Eigen::Vector3d v = mesh.vert(i, j);
             coors[j] = Eigen::Vector2i{(v.x() + 1.0) * image_width / 2,
                                        (v.y() + 1.0) * image_height / 2};
+            world_coors[j] = v;
         }
+        Eigen::Vector3d n = (world_coors[2] - world_coors[0])
+                                    .cross(world_coors[1] - world_coors[0])
+                                    .normalized();
+        double intensity = n.dot(light_dir);
 
-        img.Triangle(coors[0], coors[1], coors[2],
-                     Color{dis(gen), dis(gen), dis(gen), 1.0});
+        if (0.0 < intensity) {
+            img.Triangle(coors[0], coors[1], coors[2],
+                         Color{intensity, intensity, intensity, 1.0});
+        }
     }
     img.WritePngFile("b.png");
 }
