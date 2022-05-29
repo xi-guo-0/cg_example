@@ -72,13 +72,29 @@ void BspTree::Node::Add(const Triangle &triangle) {
         Triangle t1(b, B, A, triangle.GetMaterial());
         Triangle t2(A, B, c, triangle.GetMaterial());
         if (0 <= fc) {
-            left_->Add(t0);
+            if (nullptr == left_) {
+                left_ = new Node(t0);
+            } else {
+                left_->Add(t0);
+            }
             left_->Add(t1);
-            right_->Add(t2);
+            if (nullptr == right_) {
+                right_ = new Node(t2);
+            } else {
+                right_->Add(t2);
+            }
         } else {
-            right_->Add(t0);
+            if (nullptr == right_) {
+                right_ = new Node(t0);
+            } else {
+                right_->Add(t0);
+            }
             right_->Add(t1);
-            left_->Add(t2);
+            if (nullptr == left_) {
+                left_ = new Node(t2);
+            } else {
+                left_->Add(t2);
+            }
         }
     }
 }
