@@ -86,5 +86,5 @@ int main() {
             img.Set(x, y, c);
         }
     }
-    img.WritePngFile("a.png");
+    img.WritePngFile("a.webp");
 }

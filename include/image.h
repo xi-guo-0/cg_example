@@ -3,9 +3,9 @@
 
 #include <color.h>
 #include <cstdint>
-#include <png.h>
 #include <string>
 #include <vector>
+#include <webp/encode.h>
 
 
 class Image {
